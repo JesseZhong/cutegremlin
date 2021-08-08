@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.exclude": {
+			"**/.git": true,
+			"**/.DS_Store": true,
+			".vscode/**": true,
+			"**/.gitignore": true,
+
+			"**/env/**": true,
+			"**/__pycache__/**": true
+		}
+	}
+}
