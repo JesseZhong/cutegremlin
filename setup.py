@@ -6,12 +6,12 @@ README = (HERE / "README.md").read_text()
 
 setup(
    name='cutegremlin',
-   version='1.0',
+   version='1.0.1',
    description='A bunch of painfully dull helpers for AWS and others resources.',
    license='MIT',
    long_description=README,
    long_description_content_type='text/markdown',
-   url='https://github.com/',
+   url='https://github.com/JesseZhong/cutegremlin',
    author='Jesse',
    author_email='jessetakuto@gmail.com',
    packages=[
@@ -22,8 +22,7 @@ setup(
        'gremlin.discord'
     ],
    install_requires=[
-       'boto3', 
-       'google-auth',
+       'boto3',
        'requests',
        'discord.py'
     ]

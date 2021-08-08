@@ -1,0 +1,3 @@
+#!/bin/bash
+
+bumpversion --verbose --allow-dirty --current-version "$1" patch setup.py gremlin/__init__.py 
