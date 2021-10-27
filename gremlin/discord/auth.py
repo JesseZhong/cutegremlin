@@ -76,7 +76,7 @@ class DiscordAuth:
     def get_user(
         self,
         access_token: str
-    ) -> {}:
+    ):
         """
             Pings Discord's API to get the user of the access token.
         """
