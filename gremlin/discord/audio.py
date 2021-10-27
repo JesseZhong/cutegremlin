@@ -1,6 +1,7 @@
 #!/bin/python
 
 import asyncio
+import os
 from discord import \
     PCMVolumeTransformer, FFmpegPCMAudio, VoiceChannel, VoiceClient
 import youtube_dl
@@ -29,12 +30,16 @@ ytdl_format_options = {
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
-def prepend(filename: str, prefix: str) -> str:
+def wrap(
+    filename: str,
+    prefix: str,
+    suffix: str
+) -> str:
     """
         Adds a prefix to the beginning of the filename.
     """
     filePath, baseName = path.split(filename)
-    baseName = prefix + baseName
+    baseName = prefix + baseName + suffix
     return path.join(filePath, baseName)
 
 
@@ -78,12 +83,13 @@ class Audio(PCMVolumeTransformer):
                 except ValueError:
                     pass
 
+        # Get the video info.
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(
             None,
             lambda: ytdl.extract_info(
                 url,
-                download=not stream
+                download=False
             )
         )
 
@@ -91,7 +97,7 @@ class Audio(PCMVolumeTransformer):
         if 'entries' in data:
             data = data['entries'][0]
 
-        # Download the video and return the filename.
+        # Get the filename.
         filename = data['url'] \
             if stream \
             else ytdl.prepare_filename(data)
@@ -99,37 +105,58 @@ class Audio(PCMVolumeTransformer):
         # Clip the video if time stamps are specified.
         if startTime or endTime or (clip and len(clip) == 2):
 
-            clippedFile = prepend(filename, clip_prefix)
+            clippedFile = wrap(
+                filename,
+                clip_prefix,
+                (f'_s${startTime}' if startTime else '') + \
+                (f'_e${endTime}' if endTime else '') + \
+                (f'_c${str(clip[0])}_${str(clip[1])}' if clip else '')
+            )
 
-            # If clipping range is specifed, override.
-            if clip:
-                result = subprocess.run(
-                    [
-                        'ffprobe',
-                        '-v', 'error',
-                        '-show_entries', 'format=duration',
-                        '-of', 'default=noprint_wrappers=1:nokey=1',
-                        filename
-                    ],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT
-                )
-                pulledDuration = float(result.stdout)
-                startTime = from_seconds(clip[0] * pulledDuration)
-                endTime = from_seconds(clip[1] * pulledDuration)
+            if not path.exists(clippedFile):
 
-            # Order matters for cutting speed.
-            # https://stackoverflow.com/a/42827058/10167844
-            before = f'-ss {stringify(startTime)}' if startTime else ''
-            if endTime:
-                dur = duration(endTime, (startTime if startTime else from_seconds(0)))
-            after = f'-to {stringify(dur)}' if endTime else ''
+                # Download the video audio before editing.
+                ytdl.download([url])
 
-            system(f'ffmpeg -y -hide_banner -loglevel error {before} -i {filename} -vn {after} -c copy {clippedFile}')
+                # If clipping range is specifed, override.
+                if clip:
+                    result = subprocess.run(
+                        [
+                            'ffprobe',
+                            '-v', 'error',
+                            '-show_entries', 'format=duration',
+                            '-of', 'default=noprint_wrappers=1:nokey=1',
+                            filename
+                        ],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT
+                    )
+                    pulledDuration = float(result.stdout)
+                    startTime = from_seconds(clip[0] * pulledDuration)
+                    endTime = from_seconds(clip[1] * pulledDuration)
+
+                # Order matters for cutting speed.
+                # https://stackoverflow.com/a/42827058/10167844
+                before = f'-ss {stringify(startTime)}' if startTime else ''
+                if endTime:
+                    dur = duration(endTime, (startTime if startTime else from_seconds(0)))
+                after = f'-to {stringify(dur)}' if endTime else ''
+
+                system(f'ffmpeg -y -hide_banner -loglevel error {before} -i {filename} -vn {after} -c copy {clippedFile}')
+
+                # Remove the original file.
+                os.remove(filename)
 
 
-            # Prep the clipped file instead of the original.
+            # Use the clipped file.
             filename = clippedFile
+
+        # Handle unclipped files.
+        else:
+
+            # Download video audio if it wasn't previously downloaded.
+            if not (path.exists(filename)):
+                ytdl.download([url])
 
 
         return cls(
