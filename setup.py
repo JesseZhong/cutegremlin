@@ -19,7 +19,8 @@ setup(
        'gremlin.aws',
        'gremlin.web',
        'gremlin.google',
-       'gremlin.discord'
+       'gremlin.discord',
+       'gremlin.audio'
     ],
    install_requires=[
        'boto3',
