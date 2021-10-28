@@ -25,7 +25,8 @@ ytdl_format_options = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
-    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
+    'source_address': '0.0.0.0', # bind to ipv4 since ipv6 addresses cause issues sometimes
+    'cachedir': False # https://stackoverflow.com/a/32105062/10167844
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
@@ -109,9 +110,9 @@ class Audio(PCMVolumeTransformer):
             clippedFile = wrap(
                 filename,
                 clip_prefix,
-                (f'_s${start}' if start else '') + \
-                (f'_e${end}' if end else '') + \
-                (f'_c${str(clip[0])}_${str(clip[1])}' if clip else '')
+                (f'_s{start}' if start else '') + \
+                (f'_e{end}' if end else '') + \
+                (f'_c{str(clip[0])}_{str(clip[1])}' if clip else '')
             )
 
             if not path.exists(clippedFile):
