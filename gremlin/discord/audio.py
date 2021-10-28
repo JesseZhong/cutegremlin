@@ -39,7 +39,8 @@ def wrap(
         Adds a prefix to the beginning of the filename.
     """
     filePath, baseName = path.split(filename)
-    baseName = prefix + baseName + suffix
+    name, ext = path.splitext(baseName)
+    baseName = prefix + name + suffix + ext
     return path.join(filePath, baseName)
 
 
@@ -108,8 +109,8 @@ class Audio(PCMVolumeTransformer):
             clippedFile = wrap(
                 filename,
                 clip_prefix,
-                (f'_s${startTime}' if startTime else '') + \
-                (f'_e${endTime}' if endTime else '') + \
+                (f'_s${start}' if start else '') + \
+                (f'_e${end}' if end else '') + \
                 (f'_c${str(clip[0])}_${str(clip[1])}' if clip else '')
             )
 
