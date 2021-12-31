@@ -1,5 +1,6 @@
 import json
 import requests
+from typing import Dict
 from urllib.parse import quote
 
 class DiscordAuth:
@@ -39,7 +40,7 @@ class DiscordAuth:
         self,
         code: str,
         client_secret: str
-    ):
+    ) -> Dict:
         """
             Get the access token for a proper authorization.
         """
@@ -73,10 +74,40 @@ class DiscordAuth:
         return tokens['access_token']
 
 
+    def refresh_access(
+        self,
+        refresh_token: str,
+        client_secret: str
+    ) -> Dict:
+        if not refresh_token:
+            raise ValueError('Refresh token required.')
+
+        if not client_secret:
+            raise ValueError('Client secret required.')
+
+        data = {
+            'client_id': self.client_id,
+            'client_secret': client_secret,
+            'grant_type': 'refresh_token',
+            'refresh_token': refresh_token
+        }
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        response = requests.post(
+            f'{self.DISCORD_OAUTH_API}/token',
+            data=data,
+            headers=headers
+        )
+
+        tokens = json.loads(response.content)
+        return tokens
+
+
     def get_user(
         self,
         access_token: str
-    ):
+    ) -> Dict:
         """
             Pings Discord's API to get the user of the access token.
         """
