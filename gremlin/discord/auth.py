@@ -67,8 +67,19 @@ class DiscordAuth:
             headers=headers
         )
 
-        # Check for errors.
-        response.raise_for_status()
+        try:
+            # Check for errors.
+            response.raise_for_status()
+
+        except requests.HTTPError as e:
+
+            # Print and send up.
+            msg = f'Status: {response.status_code}\nReason: {response.reason}' \
+                + f'Content: {response.content}'
+
+            print(msg)
+
+            raise e
 
         tokens = json.loads(response.content)
         return tokens['access_token']
