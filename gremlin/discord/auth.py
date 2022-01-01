@@ -11,7 +11,7 @@ class DiscordAuth:
         client_id: str
     ):
         super()
-        self.redirect_url = quote(redirect_url, safe='')
+        self.redirect_url = redirect_url
         self.oath_api = f'{discord_api}/oauth2'
         self.client_id = client_id
 
@@ -29,9 +29,10 @@ class DiscordAuth:
         if not state:
             raise ValueError('A state is required.')
 
+        redirect_url = quote(self.redirect_url, safe='')
         auth_url = f'{self.oath_api}/authorize?response_type=code' + \
             f'&client_id={self.client_id}&state={state}&scope={scope}' + \
-            f'&redirect_uri={self.redirect_url}&prompt={prompt}'
+            f'&redirect_uri={redirect_url}&prompt={prompt}'
 
         return auth_url
 
