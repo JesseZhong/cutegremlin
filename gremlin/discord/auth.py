@@ -82,8 +82,7 @@ class DiscordAuth:
 
             raise e
 
-        tokens = json.loads(response.content)
-        return tokens['access_token']
+        return json.loads(response.content)
 
 
     def refresh_access(
