@@ -106,7 +106,7 @@ class DiscordAuth:
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         response = requests.post(
-            f'{self.DISCORD_OAUTH_API}/token',
+            f'{self.oath_api}/token',
             data=data,
             headers=headers
         )
@@ -124,7 +124,7 @@ class DiscordAuth:
         """
         return json.loads(
             requests.get(
-                f'{self.DISCORD_OAUTH_API}/@me',
+                f'{self.oath_api}/@me',
                 headers={
                     'Authorization': f'Bearer {access_token}'
                 }
