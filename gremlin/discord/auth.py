@@ -124,7 +124,7 @@ class DiscordAuth:
         """
         return json.loads(
             requests.get(
-                f'{self}/@me',
+                f'{self.DISCORD_OAUTH_API}/@me',
                 headers={
                     'Authorization': f'Bearer {access_token}'
                 }

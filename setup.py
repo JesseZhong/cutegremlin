@@ -6,7 +6,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
    name='cutegremlin',
-   version='1.0.9',
+   version='1.0.10',
    description='A bunch of painfully dull helpers for AWS and others resources.',
    license='MIT',
    long_description=README,
