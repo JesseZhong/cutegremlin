@@ -13,6 +13,7 @@
 
 			"**/env/**": true,
 			"**/__pycache__/**": true
-		}
+		},
+		"python.pythonPath": "/usr/bin/python3"
 	}
 }

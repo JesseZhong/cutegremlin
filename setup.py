@@ -6,8 +6,8 @@ README = (HERE / "README.md").read_text()
 
 setup(
    name='cutegremlin',
-   version='1.1.0',
-   description='A bunch of painfully dull helpers for AWS and others resources.',
+   version='1.1.1',
+   description='A bunch of painfully dull helpers for AWS, Discord, and others resources.',
    license='MIT',
    long_description=README,
    long_description_content_type='text/markdown',
@@ -18,12 +18,15 @@ setup(
        'gremlin',
        'gremlin.aws',
        'gremlin.web',
-       'gremlin.google',
-       'gremlin.discord'
+       'gremlin.discord',
+       'gremlin.db'
     ],
    install_requires=[
        'boto3',
        'requests',
-       'discord.py'
+       'discord.py',
+       'python-dotenv',
+       'youtube-dl',
+       'lmdb'
     ]
 )
