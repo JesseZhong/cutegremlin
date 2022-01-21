@@ -9,7 +9,7 @@ from typing import List
 from urllib.parse import urlparse, parse_qs, ParseResult
 from os import path, system
 import subprocess
-from discord.timestamps import from_seconds, parse_timestamp, stringify, duration
+from gremlin.discord.timestamps import from_seconds, parse_timestamp, stringify, duration
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
+from typing import Dict
 from uuid import UUID
 import re
 
 
-def createResponse(statusCode: int, body: {}):
+def createResponse(statusCode: int, body: Dict):
     """
         Creates a response object with a user provided status code and message.
     """
@@ -24,7 +25,7 @@ def createMessageResponse(statusCode: int, message: str):
     })
 
 
-def success(body: {}):
+def success(body: Dict):
     """
         Creates a response object with a
         '200' status code and a payload.
