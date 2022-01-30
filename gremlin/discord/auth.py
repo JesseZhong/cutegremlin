@@ -152,6 +152,6 @@ class DiscordAuth:
 
         # Check for expiration date and user.
         if expiry < now or 'user' not in content:
-            raise ExpiredToken()
+            raise ExpiredTokenError()
 
         return content['user']
