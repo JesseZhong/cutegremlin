@@ -3,11 +3,13 @@ import requests
 from typing import Dict
 from urllib.parse import quote
 from datetime import datetime
+from pytz import UTC
 
-class InvalidToken(Exception):
+
+class InvalidTokenError(Exception):
     pass
 
-class ExpiredToken(Exception):
+class ExpiredTokenError(Exception):
     pass
 
 
@@ -141,13 +143,15 @@ class DiscordAuth:
 
         # Throw exception if token isn't recognized by Discord.
         if not response.ok:
-            raise InvalidToken()
+            raise InvalidTokenError()
 
         content = json.loads(response.content)
-        expiry = datetime.fromisoformat(content['expires'])
+
+        now = datetime.utcnow().replace(tzinfo=UTC)
+        expiry = datetime.fromisoformat(content['expires']).replace(tzinfo=UTC)
 
         # Check for expiration date and user.
-        if expiry < datetime.now() or 'user' not in content:
+        if expiry < now or 'user' not in content:
             raise ExpiredToken()
 
         return content['user']
