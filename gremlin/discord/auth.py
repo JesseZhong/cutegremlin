@@ -2,6 +2,14 @@ import json
 import requests
 from typing import Dict
 from urllib.parse import quote
+from datetime import datetime
+
+class InvalidToken(Exception):
+    pass
+
+class ExpiredToken(Exception):
+    pass
+
 
 class DiscordAuth:
     def __init__(
@@ -122,11 +130,24 @@ class DiscordAuth:
         """
             Pings Discord's API to get the user of the access token.
         """
-        return json.loads(
-            requests.get(
-                f'{self.oath_api}/@me',
-                headers={
-                    'Authorization': f'Bearer {access_token}'
-                }
-            ).content
-        )['user']
+
+        # Get user's auth info.
+        response = requests.get(
+            f'{self.oath_api}/@me',
+            headers={
+                'Authorization': f'Bearer {access_token}'
+            }
+        )
+
+        # Throw exception if token isn't recognized by Discord.
+        if not response.ok:
+            raise InvalidToken()
+
+        content = json.loads(response.content)
+        expiry = datetime.fromisoformat(content['expires'])
+
+        # Check for expiration date and user.
+        if expiry < datetime.now() or 'user' not in content:
+            raise ExpiredToken()
+
+        return content['user']
