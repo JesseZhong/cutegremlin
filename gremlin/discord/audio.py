@@ -64,7 +64,7 @@ class Audio(PCMVolumeTransformer):
                 except ValueError:
                     pass
 
-        yt = await YTDL(
+        yt = await YTDL.create(
             url,
             'cache',
             loop=loop,
