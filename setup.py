@@ -6,7 +6,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
    name='cutegremlin',
-   version='1.1.5',
+   version='1.1.6',
    description='A bunch of painfully dull helpers for AWS, Discord, and others resources.',
    license='MIT',
    long_description=README,
@@ -27,6 +27,7 @@ setup(
        'discord.py',
        'python-dotenv',
        'youtube-dl',
+       'yt-dlp',
        'lmdb'
     ]
 )

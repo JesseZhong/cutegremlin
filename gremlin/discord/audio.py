@@ -4,32 +4,13 @@ import asyncio
 import os
 from discord import \
     PCMVolumeTransformer, FFmpegPCMAudio, VoiceChannel, VoiceClient
-import youtube_dl
 from typing import List
 from urllib.parse import urlparse, parse_qs, ParseResult
 from os import path, system
 import subprocess
 from gremlin.discord.timestamps import from_seconds, parse_timestamp, stringify, duration
+from gremlin.discord.ytdl import YTDL
 
-# Suppress noise about console usage from errors
-youtube_dl.utils.bug_reports_message = lambda: ''
-
-ytdl_format_options = {
-    'format': 'bestaudio/best',
-    'outtmpl': 'videos/%(extractor)s-%(id)s-%(title)s.%(ext)s',
-    'restrictfilenames': True,
-    'noplaylist': True,
-    'nocheckcertificate': True,
-    'ignoreerrors': False,
-    'logtostderr': False,
-    'quiet': True,
-    'no_warnings': True,
-    'default_search': 'auto',
-    'source_address': '0.0.0.0', # bind to ipv4 since ipv6 addresses cause issues sometimes
-    'cachedir': False # https://stackoverflow.com/a/32105062/10167844
-}
-
-ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 def wrap(
     filename: str,
@@ -46,8 +27,6 @@ def wrap(
 
 
 clip_prefix = 'clipped_'
-
-
 class Audio(PCMVolumeTransformer):
 
     def __init__(self, source, *, data, volume=0.5):
@@ -67,7 +46,7 @@ class Audio(PCMVolumeTransformer):
         start: str = None,
         end: str = None,
         clip: List[float],
-        loop: bool = None,
+        loop: asyncio.AbstractEventLoop = None,
         stream: bool = False
     ):
         # Parse time stamps if there are any.
@@ -85,30 +64,18 @@ class Audio(PCMVolumeTransformer):
                 except ValueError:
                     pass
 
-        # Get the video info.
-        loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(
-            None,
-            lambda: ytdl.extract_info(
-                url,
-                download=False
-            )
+        yt = await YTDL(
+            url,
+            'cache',
+            loop=loop,
+            stream=stream
         )
-
-        # If it's a playlist, grab the first item.
-        if 'entries' in data:
-            data = data['entries'][0]
-
-        # Get the filename.
-        filename = data['url'] \
-            if stream \
-            else ytdl.prepare_filename(data)
 
         # Clip the video if time stamps are specified.
         if startTime or endTime or (clip and len(clip) == 2):
 
             clippedFile = wrap(
-                filename,
+                yt.filename,
                 clip_prefix,
                 (f'_s{start}' if start else '') + \
                 (f'_e{end}' if end else '') + \
@@ -118,7 +85,7 @@ class Audio(PCMVolumeTransformer):
             if not path.exists(clippedFile):
 
                 # Download the video audio before editing.
-                ytdl.download([url])
+                yt.download()
 
                 # If clipping range is specifed, override.
                 if clip:
@@ -128,7 +95,7 @@ class Audio(PCMVolumeTransformer):
                             '-v', 'error',
                             '-show_entries', 'format=duration',
                             '-of', 'default=noprint_wrappers=1:nokey=1',
-                            filename
+                            yt.filename
                         ],
                         stdout=subprocess.PIPE,
                         stderr=subprocess.STDOUT
@@ -144,10 +111,10 @@ class Audio(PCMVolumeTransformer):
                     dur = duration(endTime, (startTime if startTime else from_seconds(0)))
                 after = f'-to {stringify(dur)}' if endTime else ''
 
-                system(f'ffmpeg -y -hide_banner -loglevel error {before} -i {filename} -vn {after} -c copy {clippedFile}')
+                system(f'ffmpeg -y -hide_banner -loglevel error {before} -i {yt.filename} -vn {after} -c copy {clippedFile}')
 
                 # Remove the original file.
-                os.remove(filename)
+                os.remove(yt.filename)
 
 
             # Use the clipped file.
@@ -157,8 +124,8 @@ class Audio(PCMVolumeTransformer):
         else:
 
             # Download video audio if it wasn't previously downloaded.
-            if not (path.exists(filename)):
-                ytdl.download([url])
+            if not (path.exists(yt.filename)):
+                yt.download()
 
 
         return cls(
@@ -166,7 +133,7 @@ class Audio(PCMVolumeTransformer):
                 filename,
                 options='-vn'
             ),
-            data=data
+            data=yt.data
         )
 
 
