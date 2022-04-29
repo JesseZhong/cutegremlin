@@ -118,7 +118,7 @@ class Audio(PCMVolumeTransformer):
 
 
             # Use the clipped file.
-            yt.filename = clippedFile
+            final_filename = clippedFile
 
         # Handle unclipped files.
         else:
@@ -127,10 +127,11 @@ class Audio(PCMVolumeTransformer):
             if not (path.exists(yt.filename)):
                 yt.download()
 
+            final_filename = yt.filename
 
         return cls(
             FFmpegPCMAudio(
-                yt.filename,
+                final_filename,
                 options='-vn'
             ),
             data=yt.data
