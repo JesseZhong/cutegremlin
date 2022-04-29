@@ -1,4 +1,11 @@
 #!/bin/bash
+
+# Attempt to load keys.
+[[ -e ".env" ]] && . .env
+
+[[ -v $TEST_KEY ]] || 'TEST_KEY is missing.' && exit 1
+[[ -v $LIVE_KEY ]] || 'LIVE_KEY is missing.' && exit 1 
+
 rm -r build/ cutegremlin.egg-info/ dist/
 python3 setup.py sdist bdist_wheel
 twine check dist/*
@@ -11,7 +18,7 @@ then
     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
 fi
 
-twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+twine upload --repository-url https://test.pypi.org/legacy/ dist/* -u '__token__' -p "$TEST_KEY"
 
 printf "\n\n"
 read -p "Are you ready to publish? (y/n)" -n 1 -r
@@ -20,4 +27,4 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]
 then
     [[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1
 fi
-twine upload dist/*
+twine upload dist/* -u '__token__' -p "$LIVE_KEY"
