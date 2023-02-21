@@ -47,7 +47,8 @@ class Audio(PCMVolumeTransformer):
         end: str = None,
         clip: List[float],
         loop: asyncio.AbstractEventLoop = None,
-        stream: bool = False
+        stream: bool = False,
+        use_ytdlp: bool = False
     ):
         # Parse time stamps if there are any.
         startTime = parse_timestamp(start) if start else None
@@ -68,7 +69,8 @@ class Audio(PCMVolumeTransformer):
             url,
             'cache',
             loop=loop,
-            stream=stream
+            stream=stream,
+            use_ytdlp=use_ytdlp
         )
 
         # Clip the video if time stamps are specified.
@@ -147,7 +149,8 @@ class Audio(PCMVolumeTransformer):
         *,
         start: str = None,
         end: str = None,
-        clip: List[float] = None
+        clip: List[float] = None,
+        use_ytdlp: bool = False
     ):
         """
             Plays the audio of a YouTube video into a voice channel.
@@ -167,7 +170,8 @@ class Audio(PCMVolumeTransformer):
             url,
             start=start,
             end=end,
-            clip=clip
+            clip=clip,
+            use_ytdlp=use_ytdlp
         )
 
         # Play audio into the voice channel.
