@@ -3,10 +3,10 @@
 # Attempt to load keys.
 [[ -e ".env" ]] && . .env
 
-[[ -v $TEST_KEY ]] || 'TEST_KEY is missing.' && exit 1
-[[ -v $LIVE_KEY ]] || 'LIVE_KEY is missing.' && exit 1 
+[[ ! -v TEST_KEY ]] && echo 'TEST_KEY is missing.' && exit 1
+[[ ! -v LIVE_KEY ]] && echo 'LIVE_KEY is missing.' && exit 1 
 
-rm -r build/ cutegremlin.egg-info/ dist/
+rm -rf build/ cutegremlin.egg-info/ dist/
 python3 setup.py sdist bdist_wheel
 twine check dist/*
 

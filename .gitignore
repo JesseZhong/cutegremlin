@@ -47,3 +47,4 @@ instance/
 env/
 .env
 .venv
+.python-version
